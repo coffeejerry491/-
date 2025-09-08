@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>フォレストファイター</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; width: 100%; font-family: "Yu Gothic", sans-serif; color: white; }
+    #overlay { 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      align-items: center; 
+      text-align: center; 
+      background: url('地図.jpg') no-repeat center center fixed;
+      background-size: cover; 
+    }
+    #overlay::after { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.5); z-index: 0; }
+    #title, .mainBtn { z-index: 1; position: relative; }
+    #title { font-size: 4em; font-weight: bold; text-shadow: 3px 3px 8px black; margin-bottom: 50px; }
+    .mainBtn { margin: 15px; padding: 15px 40px; font-size: 1.5em; border: none; border-radius: 10px; background: #2b7a0b; color: white; cursor: pointer; transition: 0.3s; }
+    .mainBtn:hover { background: #145214; }
+    #gameScreen { display: none; height: 100%; width: 100%; background-size: cover; background-position: center; background-repeat: no-repeat; position: relative; }
+    #gameText { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
+    #storyText { font-size: 1.2em; margin-bottom: 30px; white-space: pre-line; max-width: 900px; }
+    .choiceBtn { margin: 10px; padding: 12px 30px; font-size: 1.2em; border: none; border-radius: 8px; cursor: pointer; background: #ffb703; transition: 0.3s; }
+    .choiceBtn:hover { background: #fb8500; }
+  </style>
+</head>
+<body>
+
+<div id="overlay">
+  <div id="title">フォレストファイター</div>
+  <button class="mainBtn" id="startBtn">▶ ゲームを始める</button>
+  <button class="mainBtn" id="quitBtn">✖ やめる</button>
+</div>
+
+<div id="gameScreen">
+  <div id="gameText">
+    <div id="storyText"></div>
+    <div id="choices">
+      <button class="choiceBtn" id="choice1"></button>
+      <button class="choiceBtn" id="choice2"></button>
+    </div>
+  </div>
+</div>
+
+<!-- タイトルBGM -->
+<audio id="titleBgm" src="リュウキュウコノハズクが鳴く奄美大島の森.mp3" loop></audio>
+
+<script>
+const overlay = document.getElementById("overlay");
+const startBtn = document.getElementById("startBtn");
+const quitBtn = document.getElementById("quitBtn");
+const gameScreen = document.getElementById("gameScreen");
+const storyText = document.getElementById("storyText");
+const choice1 = document.getElementById("choice1");
+const choice2 = document.getElementById("choice2");
+const titleBgm = document.getElementById("titleBgm");
+
+let hasSafuru = false;
+let hasBandit = false;
+
+function showChoices(text1, handler1, text2=null, handler2=null) {
+  choice1.style.display = "inline-block"; choice1.innerText = text1; choice1.onclick = handler1;
+  if(text2 && handler2){ choice2.style.display = "inline-block"; choice2.innerText = text2; choice2.onclick = handler2; } 
+  else { choice2.style.display = "none"; choice2.onclick = null; }
+}
+
+function cleanupChoices() { choice1.style.display = "none"; choice2.style.display = "none"; }
+
+function startGame() {
+  overlay.style.display = "none";
+  gameScreen.style.display = "block";
+  // タイトルBGM停止
+  titleBgm.pause(); titleBgm.currentTime = 0;
+
+  gameScreen.style.background = "url('自宅.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "ワイはヒキニートをしている21歳。\n\n町で仕事を募集しているらしいので森を抜けて町に行こうと思う…";
+  showChoices("森に向かう", enterForest);
+}
+
+function enterForest() {
+  gameScreen.style.background = "url('奇妙な森の入り口.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "ワイは意を決して家を出た。近くの森へと進む…\n\nなんか薄暗くて気味が悪い森だ。";
+  showChoices("次に進む", mushroomScene);
+}
+
+function mushroomScene() {
+  gameScreen.style.background = "url('毒キノコ.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "しばらく歩くとおなかがすいてきた。おや、毒々しいキノコがある…";
+  showChoices("食べる", eatMushroom, "食べない", avoidMushroom);
+}
+
+function eatMushroom() {
+  gameScreen.style.background = "url('めまい.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerHTML = "なんだかめまいがしてふらふらする…<br><br><span style='color:red; font-size:2em; font-weight:bold;'>GAME OVER</span>";
+  showChoices("再スタート", startGame);
+}
+
+function avoidMushroom() {
+  gameScreen.style.background = "url('森の道.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "ワイは毒キノコを避け、歩き続けることにした。";
+  showChoices("次に進む", meetShadow);
+}
+
+// 以下、ゲーム進行は今までと同じ
+function meetShadow() {
+  gameScreen.style.background = "url('ある人物の影.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "しばらく歩くと何かの影に出くわした。";
+  showChoices("次に進む", meetSafuru);
+}
+
+function meetSafuru() {
+  gameScreen.style.background = "url('サフール.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "トゥン トゥントゥンサフールが表れた。サフールが仲間になりたそうな目でワイを見ている。";
+  showChoices("仲間にする", joinSafuru, "仲間にしない", rejectSafuru);
+}
+
+function joinSafuru() { hasSafuru = true; storyText.innerText = "サフールは裏切り、ワイを殺した……\n\nGAME OVER"; showChoices("再スタート", meetSafuru); }
+function rejectSafuru() { hasSafuru = true; storyText.innerText = "ワイはサフールを仲間にしなかった。しかしサフールは後ろから勝手についてきた……"; showChoices("次に進む", trapScene); }
+
+function trapScene() {
+  gameScreen.style.background = "url('もっこり.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "しばらく歩いていると、明らかに土が盛り上がった部分がある。";
+  showChoices("もっこりを通る", passMokkorri, "避けて横を通る", avoidMokkorri);
+}
+function passMokkorri() { storyText.innerText = "ワイは土の上を慎重に通り抜けた。安全だ…"; showChoices("次に進む", restArea); }
+function avoidMokkorri() { gameScreen.style.background = "url('落とし穴内部.jpg') no-repeat center center fixed"; gameScreen.style.backgroundSize = "cover"; storyText.innerHTML = "うわっ、落とし穴にはまってしまった！<br><br><span style='color:red; font-size:2em; font-weight:bold;'>GAME OVER</span>"; showChoices("再スタート", trapScene); }
+
+function restArea() {
+  gameScreen.style.background = "url('森の中の休憩所.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "森の中に休憩所を見つけた。少し休むか？";
+  showChoices("眠ってしまう", sleepGameOver, "頑張って起きておく", stayAwake);
+}
+function sleepGameOver() { gameScreen.style.background = "url('めまい.jpg') no-repeat center center fixed"; gameScreen.style.backgroundSize = "cover"; storyText.innerHTML = "サフールに荷物を全部取られてしまった……<br><br><span style='color:red; font-size:2em; font-weight:bold;'>GAME OVER</span>"; showChoices("再スタート", restArea); }
+function stayAwake() { storyText.innerText = "ワイは頑張って起きていた。特に何も起こらないが、休息は十分にとれた。"; cleanupChoices(); setTimeout(meetBandit, 1000); }
+
+function meetBandit() {
+  gameScreen.style.background = "url('メタルギア.jpg') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "cover";
+  storyText.innerText = "しばらく道を歩いていると、山賊に出くわした。\n\nワイ「命だけは助けてください！」\n山賊「メタル〇〇は好きか？」";
+  showChoices("好き", becomeBanditAlly, "嫌い", banditKill);
+}
+function becomeBanditAlly() { storyText.innerText = "ワイの答えに山賊は微笑み、仲間になった。"; hasBandit = true; cleanupChoices(); showChoices("次に進む", continueJourney); }
+function banditKill() { gameScreen.style.background = "url('めまい.jpg') no-repeat center center fixed"; gameScreen.style.backgroundSize = "cover"; storyText.innerHTML = "山賊はワイを斬りつけた！<br><br><span style='color:red; font-size:2em; font-weight:bold;'>GAME OVER</span>"; cleanupChoices(); showChoices("再スタート", restArea); }
+function continueJourney() { 
+  gameScreen.style.background = "url('お城.jpg') no-repeat center center fixed"; 
+  gameScreen.style.backgroundSize = "cover"; 
+  storyText.innerText = "しばらく森をあるいてやっと城にたどり着いた。よし、仕事をするのは誰かの奴隷になる事だ。こんなに仲間がいるならこの国を乗っ取れるはず。ワイ「よし、おまえら行くぞ！」"; 
+  cleanupChoices(); 
+  showChoices("デデドン猫に挑む", finalBossEncounter); 
+}
+
+function finalBossEncounter() {
+  gameScreen.style.background = "url('王様デデドン.png') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "contain";
+  storyText.innerText = "しばらく戦いながら進むと、玉座に座った王様デデドン猫が現れた！\n\nワイ「よし、戦うぞ！」";
+  cleanupChoices();
+  showChoices("戦う", startBossBattle);
+}
+
+function startBossBattle() {
+  gameScreen.style.background = "url('王様デデン.png') no-repeat center center fixed";
+  gameScreen.style.backgroundSize = "contain";
+  storyText.innerText = "王様デデドン猫が強烈な攻撃を仕掛けてきた！\n" +
+                        (hasSafuru ? "サフールが応戦する！\n" : "") +
+                        (hasBandit ? "山賊が剣で応戦する！\n" : "");
+  cleanupChoices();
+  showChoices("攻撃する", bossBattleOutcome);
+}
+
+function bossBattleOutcome() {
+  if (hasSafuru && hasBandit) {
+    gameScreen.style.background = "url('お城.jpg') no-repeat center center fixed";
+    gameScreen.style.backgroundSize = "cover";
+    storyText.innerText = "ワイたちは力を合わせ、王様デデン猫をついに倒した！\n\n城は制圧され、この国は新たな時代を迎えた…\n\n【クリア】";
+  } else {
+    storyText.innerHTML = "戦いは厳しく、仲間の力が足りずワイは敗北した…<br><br><span style='color:red; font-size:2em; font-weight:bold;'>GAME OVER</span>";
+  }
+  cleanupChoices();
+  showChoices("再スタート", startGame);
+}
+
+startBtn.onclick = () => {
+    titleBgm.play().catch(()=>{console.log("BGM再生失敗");});
+    startGame();
+};
+quitBtn.onclick = () => alert("ゲームを終了しました。");
+
+</script>
+
+</body>
+</html>
